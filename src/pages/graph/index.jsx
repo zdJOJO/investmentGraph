@@ -7,27 +7,33 @@ import {init} from './graph';
 
 @inject("graph", "actions") @observer
 class MyGpraph extends Component{
-
+  
   componentDidMount() {
     const { graph } = this.props;
     init(graph.logicDiagrams[0].model);
+  }
+
+  getFile(event){
+    if(!event.target.files[0]) return false;
+    const { actions } = this.props;
+    actions.graphAction.importGraphes(event.target.files[0]);
   }
   
   render(){
     const { graph, actions } = this.props;
     return(                 
       <div className="testColor">
-
-        <div>
+        {/* <div>
           <p>
             节点信息：{JSON.stringify(graph.selectNode)}
           </p>
           <p>
             边信息：{JSON.stringify(graph.selectEdge)}
           </p>
-        </div>
+        </div> */}
 
         <div className="buttons">
+          <p>数据导入:  <input type="file" ref="graphes" onChange={this.getFile.bind(this)}/></p>
           <p>
             <input
               placeholder="请填写新投资图谱的名字" 

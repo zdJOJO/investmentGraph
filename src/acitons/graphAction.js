@@ -69,6 +69,22 @@ export default class GraphAction {
     this.state.logicDiagrams[index].name = name;
   }
 
+  /* 导入 所有逻辑图 */
+  importGraphes=(file)=>{
+
+    const _thisAction = this;
+
+    function handFile(file){
+      const reader = new FileReader();
+      reader.onload = function(e){
+        _thisAction.state.logicDiagrams = JSON.parse(e.target.result);
+        window.localStorage.setItem("InvestmentGraph", e.target.result);
+      };
+      reader.readAsText(file);
+    }
+    handFile(file);
+  };
+
   /* 导出 所有逻辑图 */
   exportGraphes=()=>{
     var text = JSON.stringify(this.state.logicDiagrams);
