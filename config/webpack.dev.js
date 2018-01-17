@@ -1,5 +1,6 @@
 const path = require("path");
 const webpack = require("webpack");
+const { CheckerPlugin } = require('awesome-typescript-loader');
 
 let port = 3002; 
 
@@ -21,15 +22,21 @@ module.exports = {
   },
 
   resolve: {
-    extensions: [".js", ".jsx"]
+    extensions: ['.ts', '.tsx', '.js', '.jsx']
   },
 
   module: {
     rules: [
       {
-        test: /\.js[x]?$/,  // ==> 正则匹配 .js .jsx
+        test:  /\.tsx?$/,
         use: {
-          loader: "babel-loader"
+          loader: 'awesome-typescript-loader'
+        }
+      },
+      {
+        test: /\.jsx?$/,  // ==> 正则匹配 .js .jsx
+        use: {
+          loader: "awesome-typescript-loader"
           // options: {
           //   presets: ["react", "es2015", "stage-1"],
           //   plugins: ["transform-decorators-legacy"]
@@ -40,6 +47,11 @@ module.exports = {
       },
       {
         test: /\.js[x]?$/,  // ==> 正则匹配 .js .jsx
+        use: "eslint-loader",
+        exclude: /node_modules/
+      },
+      {
+        test: /\.ts[x]?$/,  // ==> 正则匹配 .ts .tsx
         use: "eslint-loader",
         exclude: /node_modules/
       },
@@ -82,7 +94,10 @@ module.exports = {
     host: "0.0.0.0",
     port: port,
     hot: true,
-    historyApiFallback: true
+    historyApiFallback: true,
+    proxy: {
+      "/reason/**": "http://172.20.201.112"
+    }
   }
 
 };

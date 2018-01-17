@@ -129,10 +129,11 @@ function init(model) {
         )
       ),
       // four small named ports, one on each side:
-      makePort("T", go.Spot.Top, false, true),
+      makePort("T", go.Spot.Top, true, true),
       makePort("L", go.Spot.Left, true, true),
       makePort("R", go.Spot.Right, true, true),
-      makePort("B", go.Spot.Bottom, true, false),
+      makePort("B", go.Spot.Bottom, true, true),
+
       { // handle mouse enter/leave events to show/hide the ports
         mouseEnter: function(e, node) { showSmallPorts(node, true) },
         mouseLeave: function(e, node) { showSmallPorts(node, false) }

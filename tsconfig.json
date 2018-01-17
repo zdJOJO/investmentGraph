@@ -1,6 +1,35 @@
 {
   "compilerOptions": {
-      "experimentalDecorators": true,
-      "allowJs": true
-  }
+    "allowUnusedLabels": true,
+    "allowUnreachableCode": true,
+    "experimentalDecorators": true,
+    "module": "esnext",
+    "target": "es2015",
+    "lib": [
+      "es6",
+      "dom"
+    ],
+    "strict": true,
+    "jsx": "react",
+    "sourceMap": true,
+    "allowJs": true,
+    
+    "moduleResolution": "node",
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitThis": true,
+    "noImplicitAny": false,
+    "alwaysStrict": true,
+
+    "suppressImplicitAnyIndexErrors": true,
+    "noUnusedLocals": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true
+  },
+  "compileOnSave": false,
+  "include": [
+    "./src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

@@ -19,11 +19,19 @@ module.exports = {
   },
 
   resolve: {
-    extensions: [".js", ".jsx"]
+    extensions: ['.ts', '.tsx', '.js', '.jsx']
   },
 
   module: {
     rules: [
+      {
+        test:  /\.ts[x]?$/,
+        use: {
+          loader: 'awesome-typescript-loader'
+        },
+        include: path.resolve(__dirname, "../src"),  //需要绝对路径
+        exclude: /node_modules/   // 告诉Babel不要处理node_modules文件夹中的文件
+      },
       {
         test: /\.js[x]?$/,  // ==> 正则匹配 .js .jsx
         use: {
