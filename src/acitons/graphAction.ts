@@ -1,4 +1,5 @@
 import { action } from "mobx";
+import Cookies from 'js-cookie';
 import { load, save } from '../pages/graph/graph';
 import Graph from '../store/graphStore';
 
@@ -6,7 +7,7 @@ export default class GraphAction {
 
   state: Graph
 
-  constructor(state: Graph){
+  constructor( state ){
     this.state = state;
   }
 
@@ -148,6 +149,57 @@ export default class GraphAction {
       }
     });
     this.state.logicDiagrams = temp;
+  }
+
+  /* 先登录 */
+  login=()=>{
+    return fetch("/reason/auth/login?username=zhangding&password=111111", {credentials: "include"})
+      .then( res => {
+        return res.json();
+      })
+      .then( json => {
+        Cookies.set("operator", "zhangding");
+        return Promise.resolve(json.response.token)
+      })
+      .catch( e => {
+        console.log(e);
+      })
+  }
+
+  /* 获取新闻 */ // /reason/reasonerrule/queryPage?&status=&start=1&limit=20
+  @action getNewsAndRules=(token)=>{
+    let urls = ["reasonerrule", "news"]
+    Promise.all(
+      urls.map( url => {
+        return fetch(`/reason/${url}/queryPage?limit=30&start=1`, {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": token
+          },
+          credentials: "include"
+        })
+          .then( res => {
+            return res.json();
+          })
+          .then( json => {
+            return Promise.resolve(json.response.rows)
+          })
+      })
+    )
+      .then( values => {
+        console.log(values)
+        this.state.rules = values[0];
+        this.state.news = values[1];
+      })
+      .catch( e => {
+        console.log(e);
+      })
+      
+  }
+
+  /* 切换 */
+  @action chooseTab=(tabName: string)=>{
+    this.state.tab = tabName
   }
 
 };

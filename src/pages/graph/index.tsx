@@ -8,8 +8,12 @@ import {init} from './graph';
 class MyGpraph extends React.Component<any, any>{
   
   componentDidMount() {
-    const { graph } = this.props;
+    const { graph, actions } = this.props;
     init(graph.logicDiagrams[0].model);
+    actions.graphAction.login()
+      .then( token => {
+        actions.graphAction.getNewsAndRules(token);
+      })
   }
 
   getFile(event){
@@ -22,15 +26,6 @@ class MyGpraph extends React.Component<any, any>{
     const { graph, actions } = this.props;
     return(                 
       <div className="testColor">
-        {/* <div>
-          <p>
-            节点信息：{JSON.stringify(graph.selectNode)}
-          </p>
-          <p>
-            边信息：{JSON.stringify(graph.selectEdge)}
-          </p>
-        </div> */}
-
         <div className="buttons">
           <p>数据导入:  <input type="file" ref="graphes" onChange={this.getFile.bind(this)}/></p>
           <p>
@@ -103,9 +98,29 @@ class MyGpraph extends React.Component<any, any>{
 
           <div className="editPanel">
             <div style={{display: "flex"}}>
-              <button>规则</button>
-              <button>属性</button>
-              <button>数据源</button>
+              <button onClick={()=>{actions.graphAction.chooseTab("attr")}}>属性</button> 
+              <button onClick={()=>{actions.graphAction.chooseTab("rule")}}>规则</button>
+              <button onClick={()=>{actions.graphAction.chooseTab("source")}}>数据源</button>
+            </div>
+            <div>
+              { graph.tab==="attr" &&
+                <ul>
+                  <li>节点名称: {graph.selectNode.text}</li>
+                  <li>背景色: {graph.selectNode.fill}</li>
+                  <li>大小: {graph.selectNode.size}</li>
+                  <li>位置: {graph.selectNode.loc}</li>
+                </ul>
+              }
+              { graph.tab==="rule" &&
+                <ul>
+                  { graph.rules.map( rule => <li key={rule.id}>{rule.rule_name}</li> )}
+                </ul>
+              }
+              { graph.tab==="source" &&
+                <ul>
+                  { graph.news.map( itemNew => <li key={itemNew.id}>{itemNew.edit_title}</li> )}
+                </ul>
+              }
             </div>
           </div>
         </div>

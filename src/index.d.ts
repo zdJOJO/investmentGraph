@@ -8,6 +8,7 @@ interface GraphNode {
   fill?: string
   size?: string
   loc?: string 
+  rules?: any[]
 }
 
 interface GraphLink {

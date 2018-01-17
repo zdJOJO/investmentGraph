@@ -96,7 +96,7 @@ module.exports = {
     hot: true,
     historyApiFallback: true,
     proxy: {
-      "/reason/**": "http://172.20.201.112"
+      "/reason/**": "http://172.20.201.112:9393"
     }
   }
 

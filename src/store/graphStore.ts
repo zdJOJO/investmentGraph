@@ -2,7 +2,9 @@ import { observable } from "mobx";
 
 export default class Graph {
 
-  baseModel: GraphModel
+  token: string
+
+  baseModel: GraphModel;
 
   @observable logicDiagrams = window.localStorage.getItem("InvestmentGraph") 
     ? JSON.parse(String(window.localStorage.getItem("InvestmentGraph")))
@@ -18,7 +20,13 @@ export default class Graph {
 
   @observable selectGraphId: string | number = this.logicDiagrams[0].id;
 
-  @observable selectNode: GraphNode;
+  @observable selectNode: GraphNode = {
+    key: "",
+    text: "",
+    fill: "",
+    size: "",
+    loc: ""
+  }
 
   @observable selectEdge: GraphLink;
 
@@ -26,5 +34,11 @@ export default class Graph {
 
   // 检索信息
   @observable retrieveValue: string = "";
+
+  @observable tab: string = "attr" ; // rule | attr | source
+
+  @observable news: any[] = [];
+
+  @observable rules: any[] = [];
 
 }

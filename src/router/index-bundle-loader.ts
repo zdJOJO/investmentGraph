@@ -11,7 +11,8 @@ const getComponentLazily = (importor, name = 'default') => {
       cb(null, module[name]);
     })
       .catch((err) => {
-        console.error(`动态路由加载失败：${err}`)
+        console.log(err);
+        console.error('动态路由加载失败');
       });
   }
 };
