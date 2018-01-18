@@ -2,6 +2,7 @@ import * as React from "react";
 import { observer, inject } from "mobx-react";
 
 import './drag.less';
+import './DataInspector.css';
 import {init} from './graph';
 
 @inject("graph", "actions") @observer
@@ -97,31 +98,23 @@ class MyGpraph extends React.Component<any, any>{
           <div id="myDiagramDiv" />
 
           <div className="editPanel">
+            <div id="myInspectorDiv" className="inspector"/>
             <div style={{display: "flex"}}>
               <button onClick={()=>{actions.graphAction.chooseTab("attr")}}>属性</button> 
               <button onClick={()=>{actions.graphAction.chooseTab("rule")}}>规则</button>
               <button onClick={()=>{actions.graphAction.chooseTab("source")}}>数据源</button>
             </div>
-            <div>
-              { graph.tab==="attr" &&
-                <ul>
-                  <li>节点名称: {graph.selectNode.text}</li>
-                  <li>背景色: {graph.selectNode.fill}</li>
-                  <li>大小: {graph.selectNode.size}</li>
-                  <li>位置: {graph.selectNode.loc}</li>
-                </ul>
-              }
-              { graph.tab==="rule" &&
-                <ul>
-                  { graph.rules.map( rule => <li key={rule.id}>{rule.rule_name}</li> )}
-                </ul>
-              }
-              { graph.tab==="source" &&
-                <ul>
-                  { graph.news.map( itemNew => <li key={itemNew.id}>{itemNew.edit_title}</li> )}
-                </ul>
-              }
-            </div>
+            { graph.tab==="attr" && <div/>}
+            { graph.tab==="rule" &&
+              <ul>
+                { graph.rules.map( rule => <li key={rule.id}>{rule.rule_name}</li> )}
+              </ul>
+            }
+            { graph.tab==="source" &&
+              <ul>
+                { graph.news.map( itemNew => <li key={itemNew.id}>{itemNew.edit_title}</li> )}
+              </ul>
+            }
           </div>
         </div>
       </div>  		

@@ -1,5 +1,6 @@
 import go from 'gojs';
 import actions from '../../acitons';
+import { Inspector } from './DataInspector';
 
 let myDiagram;
 let myPalette;
@@ -31,7 +32,9 @@ function init(model) {
         rotatingTool: $(TopRotatingTool),  // defined below
         "rotatingTool.snapAngleMultiple": 15,
         "rotatingTool.snapAngleEpsilon": 15,
-        "undoManager.isEnabled": true
+        "undoManager.isEnabled": true,
+        // allow Ctrl-G to call groupSelection()
+        "commandHandler.archetypeGroupData": { text: "Group", isGroup: true, color: "blue" }
       });
   // when the document is modified, add a "*" to the title and enable the "Save" button
   myDiagram.addDiagramListener("Modified", function(e) {
@@ -113,20 +116,26 @@ function init(model) {
             portId: "", // the default port: if no spot on link data, use closest side
             fromLinkable: true, toLinkable: true, cursor: "pointer",
             fill: "white",  // default color
-            strokeWidth: 2
+            strokeWidth: 1.5
           },
           new go.Binding("figure"),
-          new go.Binding("fill")),
+          new go.Binding("fill", "背景色"),
+          new go.Binding("stroke", "边框颜色"),
+          new go.Binding("strokeWidth", "边框宽度"),
+          new go.Binding("strokeDashArray", "边框类型")
+        ),
         $(go.TextBlock,
           {
             font: "bold 13pt Helvetica, Arial, sans-serif",
+            stroke: "#3d3d3d",
             margin: 8,
             maxSize: new go.Size(160, NaN),
             wrap: go.TextBlock.WrapFit,
             editable: true
           },
-          new go.Binding("text").makeTwoWay()
-        )
+          new go.Binding("text").makeTwoWay(),
+          new go.Binding("stroke", "文字颜色")
+        ),
       ),
       // four small named ports, one on each side:
       makePort("T", go.Spot.Top, true, true),
@@ -168,31 +177,70 @@ function init(model) {
       new go.Binding("points").makeTwoWay(),
       $(go.Shape,  // the link path shape
         new go.Binding("stroke", "color"),
+        new go.Binding("strokeDashArray", "边类型"),
+        new go.Binding("strokeWidth", "边宽"),
         { isPanelMain: true, strokeWidth: 2 }
       ),
       $(go.Shape,  // the arrowhead
-        { toArrow: "Standard", stroke: null },
-        new go.Binding("fill", "color"),
+        { toArrow: "Standard", stroke: null, strokeWidth: 6 },
+        new go.Binding("fill", "color")
       ),
       $(go.Panel, "Auto",
-        new go.Binding("visible", "isSelected").ofObject(),
+        // new go.Binding("visible", "isSelected").ofObject(),
         $(go.Shape, "RoundedRectangle",  // the link shape
-          { fill: "rgba(152, 152, 152, 0.5)", stroke: null }),
+          { fill: "rgba(152, 152, 152, 0.2)", stroke: null }),
         $(go.TextBlock,
           {
             textAlign: "center",
-            font: "10pt helvetica, arial, sans-serif",
+            font: "12pt helvetica, arial, sans-serif",
             stroke: "brown",
             margin: 1,
             minSize: new go.Size(10, NaN),
             editable: true
           },
-          new go.Binding("text").makeTwoWay())
+          new go.Binding("text").makeTwoWay(),
+          new go.Binding("font", "文字样式").makeTwoWay()
+        )
       ),
       { 
         click: function (e, link) { getLink(link) }
       }
     );
+  
+  // Groups consist of a title in the color given by the group node data
+  // above a translucent gray rectangle surrounding the member parts
+  myDiagram.groupTemplate =
+  $(go.Group, "Vertical",
+    { 
+      selectionObjectName: "PANEL",  // selection handle goes around shape, not label
+      ungroupable: true
+    },  // enable Ctrl-Shift-G to ungroup a selected Group
+    $(go.TextBlock,
+      {
+        font: "bold 19px sans-serif",
+        isMultiline: false,  // don't allow newlines in text
+        editable: true  // allow in-place editing by user
+      },
+      new go.Binding("text", "text").makeTwoWay(),
+      new go.Binding("stroke", "文字颜色")),
+    $(go.Panel, "Auto",
+      { name: "PANEL" },
+      $(go.Shape, "Rectangle",  // the rectangular shape around the members
+        { 
+          fill: "#fff", 
+          stroke: "#000", 
+          strokeWidth: 2,
+          strokeDashArray: [2, 4]
+        },
+        new go.Binding("fill", "背景色"),
+        new go.Binding("stroke", "边框颜色"),
+        new go.Binding("strokeWidth", "边框宽度"),
+        new go.Binding("strokeDashArray", "边框类型")
+      ),
+      $(go.Placeholder, { padding: 10 })  // represents where the members are
+    )
+  );
+  
   load(model);  // load an initial diagram from some JSON text
   
   /**
@@ -203,6 +251,7 @@ function init(model) {
       {
         maxSelectionCount: 1,
         nodeTemplateMap: myDiagram.nodeTemplateMap,  // share the templates used by myDiagram
+        groupTemplateMap: myDiagram.groupTemplateMap,
         linkTemplate: // simplify the link template, just in this Palette
           $(go.Link,
             { // because the GridLayout.alignment is Location and the nodes have locationSpot == Spot.Center,
@@ -228,19 +277,55 @@ function init(model) {
             $(go.Shape, { toArrow: "Standard", stroke: null })  // the arrowhead
           ),
         model: new go.GraphLinksModel([  // specify the contents of the Palette
-          { text: "Start", figure: "Circle", fill: "#00AD5F" },
+          { text: "Start", figure: "Circle", "背景色": "#00AD5F" },
           { text: "Step" },
+          { text: "组", "背景色": "#fff0", isGroup: true },
           // { text: "DB", figure: "Database", fill: "lightgray" },
-          { text: "???", figure: "Diamond", fill: "lightskyblue" },
-          { text: "End", figure: "Circle", fill: "#CE0620" },
-          { text: "Comment", figure: "RoundedRectangle", fill: "lightyellow" },
-          { text: "Triangle", figure: "Triangle", fill: "#c3c3c3"},
+          { text: "判断", figure: "Diamond", "背景色": "lightskyblue" },
+          { text: "Comment", figure: "RoundedRectangle", "背景色": "lightyellow" },
+          { text: "Triangle", figure: "Triangle", "背景色": "#c3c3c3"},
           { text: "Ellipse", figure: "Ellipse"}
         ], [
           // the Palette also has a disconnected Link, which the user can drag-and-drop
           { points: new go.List(go.Point).addAll([new go.Point(0, 0), new go.Point(60, 40)]) }
         ])
       });
+
+  /**
+   *  图形 编辑器
+   * */ 
+  let inspector = new Inspector('myInspectorDiv', myDiagram, {
+    includesOwnProperties: false,
+    properties: {
+      "text": { },
+      "key": { readOnly: true, show: Inspector.showIfPresent },
+      "isGroup": { readOnly: true, show: Inspector.showIfPresent },
+      "choices": { show: false },  // must not be shown at all
+
+      // node
+      "背景色": { show: Inspector.showIfNode, type: 'color' },
+      "边框颜色": { show: Inspector.showIfNode, type: 'color' },
+      "边框宽度": { show: Inspector.showIfNode, type: "select", choices: [1,2,4,5,6] },
+      "边框类型": { show: Inspector.showIfNode, type: "select", choices: [[0,0], [2,4]] },
+      "文字样式": { show: Inspector.showIfNode, type: "select", choices: [
+        `15px "Fira Sans", sans-serif`, 
+        `20px "Fira Sans", sans-serif`,
+        `25px "Fira Sans", sans-serif`
+      ]},
+      "文字颜色": { show: Inspector.showIfNode, type: 'color' },
+      
+      //link
+      "color": { show: Inspector.showIfLink, type: 'color' },
+      "边类型": { show: Inspector.showIfLink, type: "select", choices: [[0,0], [2,4]] },
+      "边宽": { show: Inspector.showIfLink, type: "select", choices: [1,2,4,5,6,12]},
+      "文字样式": { show: Inspector.showIfLink, type: "select", choices: [
+        `15px "Fira Sans", sans-serif`, 
+        `20px "Fira Sans", sans-serif`,
+        `25px "Fira Sans", sans-serif`
+      ]}
+    }
+  })
+
 }
 
 

@@ -187,7 +187,6 @@ export default class GraphAction {
       })
     )
       .then( values => {
-        console.log(values)
         this.state.rules = values[0];
         this.state.news = values[1];
       })
