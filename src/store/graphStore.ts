@@ -4,7 +4,10 @@ export default class Graph {
 
   token: string
 
-  baseModel: GraphModel;
+  baseModel: GraphModel = {
+    nodeDataArray: [],
+    linkDataArray: []
+  };
 
   @observable logicDiagrams = window.localStorage.getItem("InvestmentGraph") 
     ? JSON.parse(String(window.localStorage.getItem("InvestmentGraph")))

@@ -24,12 +24,12 @@ export default class GraphAction {
     this.state.logicDiagrams.push({
       id: id,
       name: this.state.newGraphName.trim(),
-      model: [{...this.state.baseModel}]
+      model: {...this.state.baseModel}
     });
     this.state.logicDiagramsCopy.push({
       id: id,
       name: this.state.newGraphName.trim(),
-      model: [{...this.state.baseModel}]
+      model: {...this.state.baseModel}
     });
     this.state.selectGraphId = id;
     this.state.newGraphName = "";
